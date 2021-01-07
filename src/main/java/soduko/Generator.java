@@ -8,11 +8,47 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Generator {
+    static boolean pringLog = false;
+
     public static void main(String args[]) {
-        SMatrix sMatrix = new SMatrix();
+//        SMatrix sMatrix = new SMatrix();
 //        sMatrix.getBlock(7).get(3,2).setValue(9);
 //        sMatrix.getBlock(6).get(3,3).setValue(9);
 //        sMatrix.print();
+
+//        SMatrix sMatrix = generate();
+//        if(null != sMatrix) {
+//            sMatrix.print();
+//        }
+
+        //calculate the precision,currently around 54%
+//        int times = 10000;
+//        int counter = 0;
+//        int i = 0;
+//        while (i++ < times) {
+//            if (generate() != null) {
+//                counter++;
+//            }
+//        }
+//        System.out.println("Tried " + times + " times and generate " + counter + " matrix." +
+//                " Precision:" + (double) counter / (double) times);
+
+        SMatrix sMatrix = getSMatrix();
+        sMatrix.print();
+    }
+
+    public static SMatrix getSMatrix(){
+        SMatrix matrix;
+        int counter = 1;
+        while(null == (matrix = generate())){
+            counter++;
+        }
+        System.out.println("Tried "+counter+" times!");
+        return matrix;
+    }
+
+    public static SMatrix generate() {
+        SMatrix sMatrix = new SMatrix();
 
         for (int i = 1; i <= 9; i++) {
             List<Set<Integer>> usedIsets = IntStream.rangeClosed(1, 3)
@@ -28,12 +64,14 @@ public class Generator {
                     continue;
                 }
 
-                if(!fillSingle(sMatrix,i,usedIsets,usedJsets,filled)){
-                    System.err.println("Can not fill the number " + i + " in Block:" + b + ", because single/conflict problem!");
-                    sMatrix.print();
-                    return;
+                if (!fillSingle(sMatrix, i, usedIsets, usedJsets, filled)) {
+                    if (pringLog) {
+                        System.err.println("Can not fill the number " + i + " in Block:" + b + ", because single/conflict problem!");
+                        sMatrix.print();
+                    }
+                    return null;
                 }
-                if(filled.contains(b)){
+                if (filled.contains(b)) {
                     continue;
                 }
 //                System.out.println("Block:" + b + "-- " + usedI + usedJ);
@@ -41,9 +79,11 @@ public class Generator {
 
                 List<SMatrix.Cell> cells = getPossibleCells(block, b, usedIsets, usedJsets);
                 if (cells.isEmpty()) {
-                    System.err.println("Could not find possible possition for number:" + i + " in Block:" + b);
-                    sMatrix.print();
-                    return;
+                    if (pringLog) {
+                        System.err.println("Could not find possible possition for number:" + i + " in Block:" + b);
+                        sMatrix.print();
+                    }
+                    return null;
                 }
                 Collections.shuffle(cells);
                 for (SMatrix.Cell cell : cells) {
@@ -59,14 +99,16 @@ public class Generator {
                     }
                 }
                 if (!filled.contains(b)) {
-                    System.err.println("Filled to fill number: " + i + " in Block:" + b);
-                    sMatrix.print();
-                    return;
+                    if (pringLog) {
+                        System.err.println("Filled to fill number: " + i + " in Block:" + b);
+                        sMatrix.print();
+                    }
+                    return null;
                 }
             }
         }
 
-        sMatrix.print();
+        return sMatrix;
     }
 
     private static boolean check(SMatrix sMatrix, int number,
@@ -88,13 +130,13 @@ public class Generator {
             }
         }
         SMatrix matrix2 = sMatrix.clone();
-        matrix2.getBlock(b).get(cell.i,cell.j).setValue(number);
+        matrix2.getBlock(b).get(cell.i, cell.j).setValue(number);
 //        System.out.println("originial+clone");
 //        sMatrix.print();
 //        matrix2.print();
         Set<Integer> filled2 = new HashSet<>(filled);
         filled2.add(b);
-        if(!fillSingle(matrix2,number,newUsedISets,newUsedJSets,filled2)){
+        if (!fillSingle(matrix2, number, newUsedISets, newUsedJSets, filled2)) {
             return false;
         }
         return true;
@@ -104,7 +146,7 @@ public class Generator {
                                       List<Set<Integer>> usedIsets, List<Set<Integer>> usedJsets,
                                       Set<Integer> filled) {
         boolean hasSingle = true;
-        while(hasSingle) {
+        while (hasSingle) {
             hasSingle = false;
             for (int b = 1; b <= 9; b++) {
                 if (filled.contains(b)) {
