@@ -5,10 +5,13 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Data
 public class SMatrix {
     List<Block> blocks = new ArrayList<>(9);
 
@@ -19,7 +22,7 @@ public class SMatrix {
     }
 
     @Override
-    public SMatrix clone(){
+    public SMatrix clone() {
         SMatrix another = new SMatrix();
         another.blocks.clear();
         blocks.stream().map(Block::clone).forEach(another.blocks::add);
@@ -28,11 +31,54 @@ public class SMatrix {
 
     public Block getBlock(final int i) {
         if (i < 1 || i > 9) {
-            System.err.println("Wrong block index: "+i);
+            System.err.println("Wrong block index: " + i);
             System.err.println("please give correct block index [1,9]");
             return null;
         }
-        return blocks.get(i-1);
+        return blocks.get(i - 1);
+    }
+
+    public List<Cell> getColumn(final int i) {
+        if (i < 1 || i > 9) {
+            System.err.println("Wrong column index: " + i);
+            System.err.println("please give correct column index [1,9]");
+            return null;
+        }
+        List<Cell> results = new ArrayList<>();
+        int c = i % 3;
+        if (c == 0) {
+            c = 3;
+        }
+        int b = (i - 1) / 3 + 1;
+        for (; b <= 9; b += 3) {
+            for (int r = 1; r <= 3; r++) {
+                results.add(getBlock(b).get(r, c));
+            }
+        }
+        return results;
+    }
+
+    public List<Cell> getRow(final int i) {
+        if (i < 1 || i > 9) {
+            System.err.println("Wrong row index: " + i);
+            System.err.println("please give correct row index [1,9]");
+            return null;
+        }
+        List<Cell> results = new ArrayList<>();
+
+        int r = i % 3;
+        if (r == 0) {
+            r = 3;
+        }
+        int b = (i - 1) / 3 * 3+ 1;
+        int end = b+2;
+        for(;b<=end;b++){
+            Block block = getBlock(b);
+            for(int c=1;c<=3;c++){
+                results.add(block.get(r,c));
+            }
+        }
+        return results;
     }
 
     public void print() {
@@ -41,9 +87,9 @@ public class SMatrix {
             List<Block> subblocks = blocks.subList(b * 3, b * 3 + 3);
             for (int i = 1; i <= 3; i++) {
                 System.out.print("| ");
-                for(Block block: subblocks) {
+                for (Block block : subblocks) {
                     for (int j = 1; j <= 3; j++) {
-                        System.out.print(block.get(i,j).getValue());
+                        System.out.print(block.get(i, j).getValue());
                         System.out.print(" ");
                     }
                     System.out.print("| ");
@@ -71,7 +117,7 @@ public class SMatrix {
         }
 
         @Override
-        public Block clone(){
+        public Block clone() {
             Block another = new Block();
             another.cells.clear();
             this.getCells().stream().map(Cell::new).forEach(another.getCells()::add);
@@ -94,9 +140,10 @@ public class SMatrix {
         final int i;
         final int j;
         int value = 0;
+        Set<Integer> possibleNumbers = new HashSet<>();
 
-        public Cell(@NonNull final Cell cell){
-            this.i  = cell.i;
+        public Cell(@NonNull final Cell cell) {
+            this.i = cell.i;
             this.j = cell.j;
             this.value = cell.value;
         }
