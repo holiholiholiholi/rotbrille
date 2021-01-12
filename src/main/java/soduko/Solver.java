@@ -9,25 +9,11 @@ import java.util.stream.IntStream;
 public class Solver {
     public static boolean log = true;
 
-    public static void main(String args[]) {
+    public static void main(String args[]) throws Exception{
 //        SMatrix matrix = getMatrixEasy();
-        SMatrix matrix = getMatrixNormal();
+//        SMatrix matrix = getMatrixNormal();
+        SMatrix matrix = SMatrixReader.read("soduko/extream1.txt");
         matrix.print();
-//        for(int b = 1;b<=9;b++){
-//            for(int r=1;r<=9;r++){
-//                for(int c=1;c<=9;c++){
-//
-//                }
-//            }
-//        }
-//        for (int i = 1; i <= 9; i++) {
-////            System.out.println(matrix.getColumn(i).stream().map(SMatrix.Cell::getValue)
-////                    .map(v -> v + "")
-////                    .collect(Collectors.joining(" ")));
-//            System.out.println(matrix.getRow(i).stream().map(SMatrix.Cell::getValue)
-//                    .map(v -> v + "")
-//                    .collect(Collectors.joining(" ")));
-//        }
 
         //first step, initial possible set
         initialCondition(matrix);
@@ -38,6 +24,7 @@ public class Solver {
         checkBlockSetInColumn(matrix);
 
         checkSingleBlock(matrix);
+
         matrix.print();
 
     }
@@ -114,7 +101,7 @@ public class Solver {
                     .map(SMatrix.Cell::getValue)
                     .filter(v -> v != 0)
                     .collect(Collectors.toSet()));
-            System.out.println(startb+":"+values);
+//            System.out.println(startb+":"+values);
 
             for (Integer value : values) {
                 List<Set<Integer>> columnSets =
